@@ -9,7 +9,7 @@
 
 using namespace std;
 
-
+// Umbenennung und Doubles?
 struct city_node{
     float x_coord;
     float y_coord;
@@ -24,17 +24,18 @@ struct elastic_net_node{
 class Elastic_net{
 
 private:
-    int array_size = 0;
+	// TODO: fix Variablen
+    int array_size = 0; // TODO: Wofür?
 
-    city_node * cities = new city_node[array_size];
-    city_node * buffer_array = new city_node[array_size];
-    int index_cities = 0;
+    city_node * cities = new city_node[array_size]; // Macht man nicht
+    city_node * buffer_array = new city_node[array_size]; // Unnötig
+    int index_cities = 0; // "
 
-    elastic_net_node * elastic_net_points = new elastic_net_node[array_size];
-    int index_elastic_points = 0;
+    elastic_net_node * elastic_net_points = new elastic_net_node[array_size]; // "
+    int index_elastic_points = 0; // "
 
-    float center_x = 0;
-    float center_y = 0;
+    float center_x = 0; // Double am besten
+    float center_y = 0; // "
     //needs to be x/y
 
     float rk = 0.1;
@@ -47,6 +48,8 @@ private:
 
 public:
 
+
+	// TODO: Initialize Nodes
     void calculate_positions(){
         //calculation done here is a rotation by the defined angle
         float angle = M_PI/index_elastic_points;
@@ -60,6 +63,7 @@ public:
         }
 
     }
+
 
     void calculate_center(){
         //calculates the x y coords of the cities center
@@ -76,6 +80,8 @@ public:
         set_center_y(y);
     }
 
+    // Wofür array size?
+    // Methode irgendwie unnötig?
     void generate(){
         //adds new nodes to the elastic net and calculates their positions
         //gets called everytime a new city is added
@@ -90,6 +96,8 @@ public:
 
 
     }
+
+
 
     void add(float x,float y){
         //adds a city with coords x and y
@@ -118,7 +126,7 @@ public:
         cout << elastic_net_points[index].x_coord << " " << elastic_net_points[index].y_coord << endl;
     }
 
-
+    // this-> in getter und Setter einfügen
     float get_center_x(){
         return center_x;
     }
