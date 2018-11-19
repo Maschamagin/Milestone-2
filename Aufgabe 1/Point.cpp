@@ -49,3 +49,7 @@ Point& Point::operator/=(const double a){
 Point Point::operator=(const Point& a){
     return Point(a.x,a.y);
 }
+
+double Point::magnitude(){
+    return sqrt(x*x+y*y);
+}
