@@ -1,6 +1,8 @@
 #ifndef POINT_H
 #define POINT_H
 
+// TODO: Abstand von zwei Points implementieren
+
 struct Point{
 	double x;
 	double y;

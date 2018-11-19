@@ -1,6 +1,8 @@
 #include "Point.h"
 #include <math.h>
 
+// TODO: Abstand von zwei Points implementieren
+
 Point::Point()
 : x(0), y(0) {}
 
