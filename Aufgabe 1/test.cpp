@@ -22,6 +22,7 @@ int main(){
 	cout << "CV Ratio: " << net.getCVRatio() << endl;
 	cout << "Number of Cities: " << net.getNumberCities() << endl;
 	cout << "Center of Cities: " << net.getCenter().x << "," << net.getCenter().y << endl;
+	cout << "Magnitude: " << net.getCenter().magnitude();
 
 
 	return 0;

@@ -1,4 +1,5 @@
 #include "Point.h"
+#include <math.h>
 
 Point::Point()
 : x(0), y(0) {}
@@ -51,5 +52,5 @@ Point Point::operator=(const Point& a){
 }
 
 double Point::magnitude(){
-    return sqrt(x*x+y*y);
+    return sqrt(x*x + y*y);
 }

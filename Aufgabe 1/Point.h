@@ -15,7 +15,7 @@ struct Point{
 	Point& operator/(const double);
 	Point& operator/=(const double);
 	Point operator=(const Point&);
-	doubel magnitude();
+	double magnitude();
 };
 
 #endif
