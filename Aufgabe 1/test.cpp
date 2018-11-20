@@ -1,6 +1,7 @@
 #include "ElasticNet.h"
 #include <iostream>
 #include "Point.h"
+#include "Iterator.h"
 
 using namespace std;
 
@@ -22,7 +23,12 @@ int main(){
 	cout << "CV Ratio: " << net.getCVRatio() << endl;
 	cout << "Number of Cities: " << net.getNumberCities() << endl;
 	cout << "Center of Cities: " << net.getCenter().x << "," << net.getCenter().y << endl;
-	cout << "Magnitude: " << net.getCenter().magnitude();
+	cout << "Magnitude: " << net.getCenter().magnitude() << endl;
+
+	Iterator ittest(&net);
+	//ittest.test();
+
+	cout << "Radius: " << net.getRadius() << endl;
 
 
 	return 0;

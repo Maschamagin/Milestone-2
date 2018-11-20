@@ -9,6 +9,7 @@
 class ElasticNet{
 
 private:
+	
 	// Vectors to store cities and nodes each as a coordinate pair (Point)
 	std::vector<Point> cities;
 	std::vector<Point> nodes;

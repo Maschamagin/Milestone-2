@@ -77,7 +77,7 @@ void ElasticNet::initializeNet(){
 
         // The circle center is then moved to the centerPoint of all cities
         this->nodes[i] = Point(x,y);
-	    this->nodes[i] += centerPoint;
+	    this->nodes[i] += this->centerPoint;
     }
 }
 
