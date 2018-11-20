@@ -69,7 +69,7 @@ void ElasticNet::initializeNet(){
 
 	// Calculate initial position of each node
 	// Nodes lay equidistant on circle with radius 'radius' 
-	for(auto i=0;i<this->numberNodes;i++){
+	for(int i=0;i < this->numberNodes;i++){
 
 		// Each position can be calculated on the unit cirlce and scaled by the radius 
         double x = this->radius * cos(2 * M_PI * i/this->numberNodes);
@@ -78,6 +78,7 @@ void ElasticNet::initializeNet(){
         // The circle center is then moved to the centerPoint of all cities
         this->nodes[i] = Point(x,y);
 	    this->nodes[i] += this->centerPoint;
+
     }
 }
 
