@@ -52,6 +52,7 @@ public:
 	// Add a city to the vector 'cities' using a Point or a pair of coordinates
 	void addCity(Point city);
 	void addCity(float xPos,float yPos);
+    void changeNet(int index, Point delta);
 
 };
 

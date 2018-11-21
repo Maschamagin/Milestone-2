@@ -4,20 +4,22 @@
 // TODO: Abstand von zwei Points implementieren
 
 struct Point{
-	double x;
-	double y;
+    double x;
+    double y;
 
-	Point();
-	Point(double x, double y);
+    Point();
+    Point(double x, double y);
 
-	Point& operator+(const Point&);
-	Point& operator+=(const Point&);
-	Point& operator*(const double);
-	Point& operator*=(const double);
-	Point& operator/(const double);
-	Point& operator/=(const double);
-	Point& operator=(const Point);
-	double magnitude();
+    Point& operator+(const Point&);
+    Point& operator+=(const Point&);
+    Point& operator-(const Point&);
+    Point& operator-=(const Point&);
+    Point& operator*(const double);
+    Point& operator*=(const double);
+    Point& operator/(const double);
+    Point& operator/=(const double);
+    Point& operator=(const Point);
+    double magnitude();
 };
 
 #endif

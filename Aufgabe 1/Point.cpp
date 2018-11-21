@@ -18,10 +18,24 @@ Point& Point::operator+(const Point& a){
 }
 
 Point& Point::operator+=(const Point& a){
-	
-	*this = *this+a;
-	
-	return *this;
+
+    *this = *this+a;
+
+    return *this;
+}
+
+Point& Point::operator-(const Point& a){
+    x = x-a.x;
+    y = y-a.y;
+
+    return *this;
+}
+
+Point& Point::operator-=(const Point& a){
+
+    *this = *this-a;
+
+    return *this;
 }
 
 Point& Point::operator*(const double a){
@@ -32,29 +46,29 @@ Point& Point::operator*(const double a){
 }
 
 Point& Point::operator*=(const double a){
-	*this = *this*a;
+    *this = *this*a;
 
-	return *this;
+    return *this;
 }
 
 Point& Point::operator/(const double a){
-	x = x / a;
-	y = y / a;
+    x = x / a;
+    y = y / a;
 
-	return *this;
+    return *this;
 }
 
 Point& Point::operator/=(const double a){
-	*this = *this/a;
+    *this = *this/a;
 
-	return *this;
+    return *this;
 }
 
 Point& Point::operator=(const Point a){
-	x = a.x;
-	y = a.y;
+    x = a.x;
+    y = a.y;
 
-	return *this;
+    return *this;
 }
 
 
