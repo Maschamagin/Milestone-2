@@ -1,7 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include "elasticNet.h"
+#include "elasticnet.h"
 
 using namespace std;
 

@@ -28,10 +28,16 @@ void Widget::paintEvent(QPaintEvent *event){
         vector<Point> nodes = net->getNodes();
         for(auto i = nodes.begin();i != nodes.end(); ++i){
             QRectF node(100+(200*i->x),100+(200*i->y),10,10);
-            qDebug() << i->x << "," << i->y << endl;
+            qDebug() << "Node: " << i->x << "," << i->y << endl;
             painter.drawRect(node);
 
          }
+        vector<Point> cities = net->getCities();
+        for(auto i = cities.begin();i != cities.end(); ++i){
+            QRectF city(100+(200*i->x),100+(200*i->y),10,10);
+            qDebug() << "City: " << i->x << "," << i->y << endl;
+            painter.drawRect(city);
+        }
     }
 
     painter.end();
