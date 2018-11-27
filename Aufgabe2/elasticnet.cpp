@@ -1,7 +1,8 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include "elasticNet.h"
+#include "elasticnet.h"
+#include <QDebug>
 
 using namespace std;
 
@@ -37,7 +38,7 @@ float ElasticNet::getRadius(){
     return this->radius;
 }
 
-void ElasticNet::setRadius(float radius){
+void ElasticNet::setRadius(double radius){
     this->radius=radius;
 }
 
@@ -45,7 +46,7 @@ float ElasticNet::getCVRatio(){
     return this->cvRatio;
 }
 
-void ElasticNet::setCVRatio(float cvRatio){
+void ElasticNet::setCVRatio(double cvRatio){
     this->cvRatio=cvRatio;
 }
 
@@ -106,4 +107,13 @@ void ElasticNet::addCity(double xPos,double yPos){
     // Create Point from coordinates and use addCity(Point)
     Point city = Point(xPos, yPos);
     this->addCity(city);
+}
+
+void ElasticNet::clearNet(){
+    // Reset the net
+    this->cities = vector<Point> ();
+    this->nodes = vector<Point> ();
+    this ->numberCities = 0;
+    this ->numberNodes = 0;
+    this ->centerPoint = Point(0,0);
 }
