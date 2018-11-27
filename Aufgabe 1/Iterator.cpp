@@ -120,8 +120,10 @@ void Iterator::apply(){
             for(int b = 0; b < numberNodes; b++){
                 //iterate through nodes again to calc denominator of vIA
                 denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
+                //sum(b e nodes) e^((|x_i - y_b|^2)/T)
             }
             vIA = exp(-(pow((net->getCities()[i] - net->getNodes()[a]).magnitude(),2))/getT())/denominator;
+            //e^((|x_i - y_a|^2)/T) / sum(b e nodes) e^((|x_i - y_b|^2)/T)
 
             deltaYa += (net->getCities()[i] - net->getNodes()[a]) * vIA;
 
