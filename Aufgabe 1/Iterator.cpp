@@ -90,6 +90,28 @@ void Iterator::apply(){
     Point deltaYa = Point();
 
 
+//    for(int a = 0; a < numberNodes; a++){
+
+//        for(int i = 0; i < net->getNumberCities(); i++){
+//            //iterate through cities
+//            for(int b = 0; b < numberNodes; b++){
+//                //iterate through nodes again to calc denominator of vIA
+//                denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
+//            }
+//            vIA = exp(-(pow((net->getCities()[i] - net->getNodes()[a]).magnitude(),2))/getT())/denominator;
+//            deltaYa += (net->getCities()[i] - net->getNodes()[a]) * vIA;
+
+//            deltaYa += (net->getNodes()[((a-1) + numberNodes)%numberNodes] + net->getNodes()[a] - (net->getNodes()[(a+1)%numberNodes] * 2)) * getBeta()*getCurrentTemperature();
+
+//        }
+//        deltaYa *= getAlpha();
+
+//        deltaY[a] = deltaYa;
+//        //reset
+//        denominator = 0;
+//        deltaYa = Point();
+
+//    }
     for(int a = 0; a < numberNodes; a++){
         //iterate through all elastic net nodes
 
@@ -107,7 +129,7 @@ void Iterator::apply(){
 
         deltaYa *= getAlpha();
 
-        deltaYa += (net->getNodes()[((a-1)%numberNodes + numberNodes)%numberNodes] + net->getNodes()[a] - (net->getNodes()[(a+1)%numberNodes] * 2)) * getBeta()*getCurrentTemperature();
+        deltaYa += (net->getNodes()[((a-1) + numberNodes)%numberNodes] + net->getNodes()[a] - (net->getNodes()[(a+1)%numberNodes] * 2)) * getBeta()*getCurrentTemperature();
                                     //c++ doesnt support modulo op. with negative values
 
         deltaY[a] = deltaYa;
@@ -122,11 +144,14 @@ void Iterator::apply(){
 
     //at this point all deltaYa are calculated and saved in deltaY
     //in the next loop all yA get changed by deltaYa
-
+    cout << "delta Y : \n";
     for(int a = 0; a < net->getNumberNodes(); a++){
         //net->getNodes()[a] += deltaY[a]; ging nicht
         net->changeNet(a, deltaY[a]);
-        cout << net->getNodes()[a].x << " " << net->getNodes()[a].y << endl ;
+
+        cout << "(" << deltaY[a].x << " " << deltaY[a].y << "), ";
+//        cout << "\n elastic net : \n";
+//        cout << net->getNodes()[a].x << " " << net->getNodes()[a].y << endl ;
     }
 
     iterCounter += 1;
