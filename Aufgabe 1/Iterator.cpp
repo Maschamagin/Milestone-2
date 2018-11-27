@@ -80,8 +80,6 @@ ElasticNet* Iterator::getNet(){
  void Iterator::apply(){
 
      this->setCurrentTemperature();
-     double K = this->getCurrentTemperature();
-     double T = this->getT();
 
      int numberNodes = this->net->getNumberNodes();
 
@@ -90,24 +88,21 @@ ElasticNet* Iterator::getNet(){
      vector<Point> nodes = this->net->getNodes();
      vector<Point> cities = this->net->getCities();
 
-     double vIA = 0;
-     double denominator = 0; //used to calc vIA
+
+      //used to calc vIA
      Point deltaYa = Point();
 
      int a_counter = 0;
 
      for(auto a = nodes.begin(); a != nodes.end(); a++){
-
+        double vIA = 0;
          for(auto i = cities.begin(); i != cities.end(); i++){
-
+            double denominator = 0;
              for(auto b = nodes.begin(); b != nodes.end(); b++){
                  //iterate through nodes again to calc denominator of vIA
-                 //denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
                  denominator += exp(-(pow((*i-*b).magnitude(),2))/getT());
-                 //sum(b e nodes) e^((|x_i - y_b|^2)/T)
              }
              vIA = exp(-(pow((*i - *a).magnitude(),2))/getT())/denominator;
-             //e^((|x_i - y_a|^2)/T) / sum(b e nodes) e^((|x_i - y_b|^2)/T)
 
              deltaYa += (*i - *a) * vIA;
 
@@ -131,7 +126,6 @@ ElasticNet* Iterator::getNet(){
 
 
          //reset
-         denominator = 0;
          deltaYa = Point();
 
          a_counter++;
