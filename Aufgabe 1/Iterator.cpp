@@ -7,14 +7,14 @@
 using namespace std;
 
 Iterator::Iterator()
-: iterMax(10000), iterCounter(0), etaTarget(0), initialTemperature(0.1),
+: iterMax(10000), iterCounter(0), etaTarget(5*pow(10, -3)), initialTemperature(0.1),
   alpha(1.0), beta(1.0), net()
 {
     this->currentTemperature = this->initialTemperature;
 }
 
 Iterator::Iterator(ElasticNet *net)
-: iterMax(10000), iterCounter(0), etaTarget(0), initialTemperature(0.1), alpha(1.0), beta(1.0), net(net)
+: iterMax(10000), iterCounter(0), etaTarget(5*pow(10, -3)), initialTemperature(0.1), alpha(1.0), beta(1.0), net(net)
 {
 	this->currentTemperature = this->initialTemperature;
 }
@@ -141,15 +141,40 @@ ElasticNet* Iterator::getNet(){
 
  iterCounter += 1;
 
+}
+
+ double Iterator::calc_eta(){
+
+    double dist = 0;
+    double distMin = 100000;
+    double distMax = -100000;
+
+    vector<Point> nodes = this->net->getNodes();
+    vector<Point> cities = this->net->getCities();
+
+    for(auto i = cities.begin(); i != cities.end(); i++){
+        for(auto a = nodes.begin(); a != nodes.end(); a++){
+            dist = (*i - *a).magnitude();
+            distMin = min(dist, distMin);
+        }
+        distMax = max(distMin, distMax);
+    }
+
+    return distMax;
+
  }
 
 void Iterator::solve(){
 
-	for(auto iterator=0; iterator < this->iterMax; iterator++){
+//	for(auto iterator=0; iterator < this->iterMax; iterator++){
 
-		// Implement if-statement to check precision etaTarget here
-		this->apply();
-	}
+//		// Implement if-statement to check precision etaTarget here
+//		this->apply();
+//	}
+    while((calc_eta() > etaTarget)||(iterCounter < iterMax)){
+        apply();
+    }
+
 }
 
 // void Iterator::test(){
