@@ -9,6 +9,7 @@
 #include <QLabel>
 #include "elasticnet.h"
 #include "point.h"
+#include "iterator.h"
 
 
 class Widget : public QWidget
@@ -26,9 +27,11 @@ private slots:
 
 private:
 
+    ElasticNet *net;
+    Iterator *iterator;
+
     QTimer *timer;
     QPushButton *clearNet;
-    ElasticNet *net;
     QSpinBox *a, *b, *itermax;
     QDoubleSpinBox *K, *cvratio, *r;
     QLabel *text_a, *text_b, *text_K, *text_itermax,*text_cvratio, *text_r;

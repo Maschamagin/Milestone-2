@@ -15,6 +15,7 @@ using namespace std;
 Widget::Widget(QWidget *parent, ElasticNet *net) :
     QWidget(parent), net(net)
 {
+    iterator = new Iterator(net);
 
     QPalette blackText;
     blackText.setColor(QPalette::Text,Qt::black);
@@ -172,5 +173,6 @@ void Widget::paintEvent(QPaintEvent *event){
 }
 
 void Widget::triggerShow(){
+    iterator->apply();
     repaint();
 }
