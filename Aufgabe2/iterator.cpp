@@ -1,5 +1,5 @@
 #include "iterator.h"
-#include "elasticnet.h"
+#include "elasticNet.h"
 #include "point.h"
 #include "math.h"
 #include <iostream> //testing
@@ -177,3 +177,7 @@ void Iterator::solve(){
         this->apply();
     }
 }
+
+// void Iterator::test(){
+// 	this->net->setRadius(2.0);
+// }

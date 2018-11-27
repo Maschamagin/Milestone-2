@@ -6,6 +6,9 @@
 #include "elasticnet.h"
 #include "point.h"
 #include <QPaintEvent>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QLabel>
 
 
 class Widget : public QWidget
@@ -23,6 +26,9 @@ private slots:
 
 private:
     QPushButton *addCity, *showNet;
+    QSpinBox *a, *b, *itermax;
+    QDoubleSpinBox *K, *cvratio, *r;
+    QLabel *text_a, *text_b, *text_K, *text_itermax,*text_cvratio, *text_r;
     ElasticNet *net;
 
 };

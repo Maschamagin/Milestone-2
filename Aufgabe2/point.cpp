@@ -10,9 +10,11 @@ Point::Point()
 Point::Point(double x, double y)
 : x(x) , y(y) {}
 
-Point Point::operator+(const Point& a){
+Point& Point::operator+(const Point& a){
+    x = x+a.x;
+    y = y+a.y;
 
-    return Point(x + a.x, y + a.y);
+    return *this;
 }
 
 Point& Point::operator+=(const Point& a){
@@ -22,20 +24,25 @@ Point& Point::operator+=(const Point& a){
     return *this;
 }
 
-Point Point::operator-(const Point& a){
-
-    return Point(x - a.x, y - a.y);
-}
-
-Point& Point::operator-=(const Point& a){
-
-    *this = *this - a;
+Point& Point::operator-(const Point& a){
+    x = x-a.x;
+    y = y-a.y;
 
     return *this;
 }
 
-Point Point::operator*(const double a){
-    return Point(x * a, y * a);
+Point& Point::operator-=(const Point& a){
+
+    *this = *this-a;
+
+    return *this;
+}
+
+Point& Point::operator*(const double a){
+    x = x * a;
+    y = y * a;
+
+    return *this;
 }
 
 Point& Point::operator*=(const double a){
@@ -44,8 +51,11 @@ Point& Point::operator*=(const double a){
     return *this;
 }
 
-Point Point::operator/(const double a){
-    return Point(x / a, y / a);
+Point& Point::operator/(const double a){
+    x = x / a;
+    y = y / a;
+
+    return *this;
 }
 
 Point& Point::operator/=(const double a){
@@ -61,7 +71,11 @@ Point& Point::operator=(const Point a){
     return *this;
 }
 
+
+// Point Point::operator=(const Point& a){
+//     return Point(a.x,a.y);
+// }
+
 double Point::magnitude(){
     return sqrt(x*x + y*y);
 }
-
