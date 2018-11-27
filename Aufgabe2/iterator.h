@@ -1,7 +1,7 @@
 #ifndef ITERATOR_H
 #define ITERATOR_H
 
-#include "elasticNet.h"
+#include "elasticnet.h"
 
 class Iterable{
 
@@ -21,9 +21,7 @@ private:
     double initialTemperature; // K(0) parameter
     double alpha; // Alpha parameter
     double beta; // Beta parameter
-    ElasticNet *net; // Pointer auf das übergebene Netz
-
-    // Wenn man in Iterator das Netz ändert, ist es global geändert
+    ElasticNet *net; // Pointer on given net - changes are global!
 
 public:
 
@@ -48,13 +46,10 @@ public:
     double getAlpha();
     double getBeta();
 
-    // Mal schauen wie das funktioniert oder ob wir das Net public machen
     ElasticNet* getNet();
 
     void solve();
     void apply();
-
-    // void test(); // Zum Testen ob Änderungen am Netz global sind
 };
 
 #endif

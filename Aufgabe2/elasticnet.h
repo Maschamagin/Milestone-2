@@ -5,8 +5,10 @@
 
 #include <vector>
 #include "point.h"
+#include <QObject>
 
-class ElasticNet{
+class ElasticNet : public QObject{
+Q_OBJECT
 
 private:
 
@@ -25,6 +27,12 @@ private:
     float radius;
     float cvRatio;
 
+public slots:
+
+    void clearNet();
+    void setRadius(double radius);
+    void setCVRatio(double cvRatio);
+
 public:
 
     // Default constructor
@@ -40,10 +48,6 @@ public:
     Point getCenter();
     float getRadius();
     float getCVRatio();
-
-    // Setter
-    void setRadius(float radius);
-    void setCVRatio(float cvRatio);
 
     // Initialize 'cvRatio'*'numberCities' many nodes on a circle with radius 'radius'
     // Cirlce is centered around center of cities (centerPoint) and nodes are split equidistant
