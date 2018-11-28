@@ -13,6 +13,9 @@ int main(int argc, char *argv[])
     net.addCity(0.1,0.1);
     net.addCity(0.3,0.2);
     net.addCity(0.1,0.5);
+    net.addCity(0.9,0.1);
+    net.addCity(0.3,0.8);
+    net.addCity(0.7,0.9);
 
     QApplication a(argc, argv);
 

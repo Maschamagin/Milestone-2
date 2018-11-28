@@ -61,7 +61,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_r->setText("Radius");
 
 
-    //initialize spinbox
+    //Initialize spinboxes
 
     a = new QDoubleSpinBox(this);
     b = new QDoubleSpinBox(this);
@@ -71,9 +71,8 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
 
     itermax = new QSpinBox(this);
 
-    //set property of spinbox
+    //Set properties of Spinboxex
 
-    //set geometry
     a->setPalette(blackText);
     a->setGeometry(10,100,80,20);
     b->setPalette(blackText);
@@ -86,8 +85,6 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     cvratio->setGeometry(10,280,80,20);
     r->setPalette(blackText);
     r->setGeometry(10,325,80,20);
-
-    //set interval and steps of spinbox respectively doublespinbox
 
     a->setMinimum(0);
     a->setMaximum(1000);
@@ -113,7 +110,6 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     r->setMaximum(10);
     r->setSingleStep(0.1);
 
-    //defult values
     a->setValue(1);
     b->setValue(1);
     K->setValue(0.1);
@@ -121,7 +117,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     cvratio->setValue(2.5);
     r->setValue(0.1);
 
-    //connect statements
+    // Connect all spinboxes to respective iterator slots
 
     connect(a,SIGNAL(valueChanged(double)),iterator,SLOT(setAlpha(double)));
     connect(b,SIGNAL(valueChanged(double)),iterator,SLOT(setBeta(double)));
@@ -130,13 +126,15 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     connect(cvratio,SIGNAL(valueChanged(double)),net,SLOT(setCVRatio(double)));
     connect(r,SIGNAL(valueChanged(double)),net,SLOT(setRadius(double)));
 
+    // Connect timer to apply function
     timerApply->setInterval(50);
-    connect(start,SIGNAL(clicked()),timerApply,SLOT(start()));
-    connect(stop,SIGNAL(clicked()),timerApply,SLOT(stop()));
     connect(timerApply,SIGNAL(timeout()),this,SLOT(triggerApply()));
 
+    // Connect buttons
     connect(clearNet,SIGNAL(clicked()),this,SLOT(triggerClear()));
     connect(solveNet,SIGNAL(clicked()),this,SLOT(triggerSolve()));
+    connect(start,SIGNAL(clicked()),timerApply,SLOT(start()));
+    connect(stop,SIGNAL(clicked()),timerApply,SLOT(stop()));
 }
 
 void Widget::paintEvent(QPaintEvent *event){

@@ -1,7 +1,7 @@
 #include "iterator.h"
 #include "elasticnet.h"
 #include "point.h"
-#include "math.h"
+#include <cmath>
 
 using namespace std;
 

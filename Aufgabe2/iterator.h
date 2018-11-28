@@ -30,7 +30,6 @@ public slots:
     void solve();
     void apply();
     void setInitialTemperature(double temp);
-    void setCurrentTemperature();
     void setIterMax(int iterMax);
     void setAlpha(double alpha);
     void setBeta(double beta);
@@ -42,7 +41,7 @@ public:
     Iterator(ElasticNet *net, double alpha, double beta, double temperature);
     Iterator(ElasticNet *net);
 
-
+    void setCurrentTemperature();
     void setNet(ElasticNet *net);
 
     double getInitialTemperature();

@@ -1,8 +1,8 @@
 #include "point.h"
-#include <math.h>
+#include <cmath>
 #include <utility>
 
-// TODO: Abstand von zwei Points implementieren
+using namespace std;
 
 Point::Point()
 : x(0), y(0) {}
