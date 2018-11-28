@@ -2,6 +2,7 @@
 #define ITERATOR_H
 
 #include "elasticnet.h"
+#include <QObject>
 
 class Iterable{
 
@@ -10,7 +11,8 @@ public:
 
 };
 
-class Iterator : public Iterable{
+class Iterator : public QObject, public Iterable{
+Q_OBJECT
 
 private:
 
@@ -23,19 +25,23 @@ private:
     double beta; // Beta parameter
     ElasticNet *net; // Pointer on given net - changes are global!
 
-public:
+public slots:
 
-
-
-    Iterator();
-    Iterator(ElasticNet *net, double alpha, double beta, double temperature);
-    Iterator(ElasticNet *net);
-
+    void solve();
+    void apply();
     void setInitialTemperature(double temp);
     void setCurrentTemperature();
     void setIterMax(int iterMax);
     void setAlpha(double alpha);
     void setBeta(double beta);
+    void setEtaTarget(double eta);
+
+public:
+
+    Iterator();
+    Iterator(ElasticNet *net, double alpha, double beta, double temperature);
+    Iterator(ElasticNet *net);
+
 
     void setNet(ElasticNet *net);
 
@@ -45,13 +51,11 @@ public:
     double getIterMax();
     double getAlpha();
     double getBeta();
+    double getEtaTarget();
 
     ElasticNet* getNet();
 
     double calcEta();
-
-    void solve();
-    void apply();
 };
 
 #endif

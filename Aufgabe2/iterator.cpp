@@ -44,6 +44,10 @@ void Iterator::setBeta(double beta){
     this->beta = beta;
  }
 
+void Iterator::setEtaTarget(double eta){
+    this->etaTarget = eta;
+}
+
 void Iterator::setNet(ElasticNet *net){
     this->net = net;
  }
@@ -70,6 +74,10 @@ double Iterator::getAlpha(){
 
 double Iterator::getBeta(){
     return this->beta;
+}
+
+double Iterator::getEtaTarget(){
+    return this->etaTarget;
 }
 
 ElasticNet* Iterator::getNet(){
@@ -170,8 +178,7 @@ double Iterator::calcEta(){
 
 void Iterator::solve(){
 
-   while((calcEta() > etaTarget)||(iterCounter < iterMax)){
+   while((calcEta() > etaTarget)&&(iterCounter < iterMax)){
        apply();
    }
-
 }

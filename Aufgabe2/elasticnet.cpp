@@ -2,7 +2,6 @@
 #include <math.h>
 #include <vector>
 #include "elasticnet.h"
-#include <QDebug>
 
 using namespace std;
 

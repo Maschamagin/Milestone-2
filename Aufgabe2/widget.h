@@ -23,17 +23,19 @@ public:
 
 private slots:
 
-   void triggerShow();
+   void triggerApply();
+   void triggerClear();
+   void triggerSolve();
 
 private:
 
     ElasticNet *net;
     Iterator *iterator;
 
-    QTimer *timer;
-    QPushButton *clearNet;
-    QSpinBox *a, *b, *itermax;
-    QDoubleSpinBox *K, *cvratio, *r;
+    QTimer *timerApply;
+    QPushButton *clearNet, *solveNet, *start, *stop;
+    QSpinBox *itermax;
+    QDoubleSpinBox *a, *b, *K, *cvratio, *r;
     QLabel *text_a, *text_b, *text_K, *text_itermax,*text_cvratio, *text_r;
 
 };

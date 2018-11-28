@@ -8,7 +8,7 @@
 
 #define STARTX 150
 #define STARTY 100
-#define SCALE 200
+#define SCALE 300
 
 using namespace std;
 
@@ -20,10 +20,18 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     QPalette blackText;
     blackText.setColor(QPalette::Text,Qt::black);
 
-    timer = new QTimer(this);
+    timerApply = new QTimer(this);
 
     clearNet = new QPushButton("Clear Net",this);
-    clearNet->setGeometry(10,10,100,30);
+    clearNet->setGeometry(10,10,120,30);
+
+    solveNet = new QPushButton("Solve Net",this);
+    solveNet->setGeometry(10,40,120,30);
+
+    start = new QPushButton("Start Iterator",this);
+    start->setGeometry(130,10,120,30);
+    stop = new QPushButton("Stop Iterator", this);
+    stop->setGeometry(130,40,120,30);
 
     //initialize textlabels
 
@@ -55,8 +63,8 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
 
     //initialize spinbox
 
-    a = new QSpinBox(this);
-    b = new QSpinBox(this);
+    a = new QDoubleSpinBox(this);
+    b = new QDoubleSpinBox(this);
     K = new QDoubleSpinBox(this);
     cvratio = new QDoubleSpinBox(this);
     r = new QDoubleSpinBox(this);
@@ -115,17 +123,20 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
 
     //connect statements
 
-    // connect(a,SIGNAL(valueChanged(int)),this,SLOT(getAlpha(int)));
-    // connect(b,SIGNAL(valueChanged(int)),this,SLOT(getBeta(int)));
-    // connect(K,SIGNAL(valueChanged(int)),iterator,SLOT(getCurrentTemperature(int)));
-    // connect(itermax,SIGNAL(valueChanged(int)),net,SLOT(getIterMax(int)));
+    connect(a,SIGNAL(valueChanged(double)),iterator,SLOT(setAlpha(double)));
+    connect(b,SIGNAL(valueChanged(double)),iterator,SLOT(setBeta(double)));
+    connect(K,SIGNAL(valueChanged(double)),iterator,SLOT(setInitialTemperature(double)));
+    connect(itermax,SIGNAL(valueChanged(int)),iterator,SLOT(setIterMax(int)));
     connect(cvratio,SIGNAL(valueChanged(double)),net,SLOT(setCVRatio(double)));
     connect(r,SIGNAL(valueChanged(double)),net,SLOT(setRadius(double)));
 
-    timer->start();
-    connect(timer,SIGNAL(timeout()),this,SLOT(triggerShow()));
-    connect(clearNet,SIGNAL(clicked()),net,SLOT(clearNet()));
+    timerApply->setInterval(50);
+    connect(start,SIGNAL(clicked()),timerApply,SLOT(start()));
+    connect(stop,SIGNAL(clicked()),timerApply,SLOT(stop()));
+    connect(timerApply,SIGNAL(timeout()),this,SLOT(triggerApply()));
 
+    connect(clearNet,SIGNAL(clicked()),this,SLOT(triggerClear()));
+    connect(solveNet,SIGNAL(clicked()),this,SLOT(triggerSolve()));
 }
 
 void Widget::paintEvent(QPaintEvent *event){
@@ -172,7 +183,19 @@ void Widget::paintEvent(QPaintEvent *event){
     painter.end();
 }
 
-void Widget::triggerShow(){
-    iterator->apply();
+void Widget::triggerApply(){
+    if(iterator->calcEta() > iterator->getEtaTarget()){
+        iterator->apply();
+    }
+    repaint();
+}
+
+void Widget::triggerClear(){
+    net->clearNet();
+    repaint();
+}
+
+void Widget::triggerSolve(){
+    iterator->solve();
     repaint();
 }
