@@ -61,7 +61,11 @@ Point& Point::operator=(const Point a){
     return *this;
 }
 
-double Point::magnitude(){
+double Point::euclidianDistance(){
     return sqrt(x*x + y*y);
+}
+
+double Point::manhattanDistance(){
+    return abs(x)+abs(y);
 }
 

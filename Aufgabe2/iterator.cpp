@@ -2,7 +2,6 @@
 #include "elasticnet.h"
 #include "point.h"
 #include "math.h"
-#include <iostream> //testing
 
 using namespace std;
 
@@ -105,10 +104,10 @@ void Iterator::apply(){
              for(auto b = nodes.begin(); b != nodes.end(); b++){
                  //iterate through nodes again to calc denominator of vIA
                  //denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
-                 denominator += exp(-(pow((*i-*b).magnitude(),2))/T);
+                 denominator += exp(-(pow((*i-*b).manhattanDistance(),2))/T);
                  //sum(b e nodes) e^((|x_i - y_b|^2)/T)
              }
-             vIA = exp(-(pow((*i - *a).magnitude(),2))/T)/denominator;
+             vIA = exp(-(pow((*i - *a).manhattanDistance(),2))/T)/denominator;
              //e^((|x_i - y_a|^2)/T) / sum(b e nodes) e^((|x_i - y_b|^2)/T)
 
              deltaYa += (*i - *a) * vIA;
@@ -148,11 +147,31 @@ void Iterator::apply(){
  }
 
 
+double Iterator::calcEta(){
+
+   double dist = 0;
+   double distMin = 100000;
+   double distMax = -100000;
+
+   vector<Point> nodes = this->net->getNodes();
+   vector<Point> cities = this->net->getCities();
+
+   for(auto i = cities.begin(); i != cities.end(); i++){
+       for(auto a = nodes.begin(); a != nodes.end(); a++){
+           dist = (*i - *a).euclidianDistance();
+           distMin = min(dist, distMin);
+       }
+       distMax = max(distMin, distMax);
+   }
+
+   return distMax;
+
+}
+
 void Iterator::solve(){
 
-    for(iterCounter = 0; iterCounter < this->iterMax; ++iterCounter){
+   while((calcEta() > etaTarget)||(iterCounter < iterMax)){
+       apply();
+   }
 
-        // Implement if-statement to check precision etaTarget here
-        this->apply();
-    }
 }

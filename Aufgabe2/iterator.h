@@ -48,6 +48,8 @@ public:
 
     ElasticNet* getNet();
 
+    double calcEta();
+
     void solve();
     void apply();
 };

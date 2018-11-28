@@ -1,22 +1,21 @@
-#include "Iterator.h"
-#include "ElasticNet.h"
-#include "Point.h"
+#include "iterator.h"
+#include "elasticnet.h"
+#include "point.h"
 #include "math.h"
-#include <iostream> //testing
 
 using namespace std;
 
 Iterator::Iterator()
-: iterMax(10000), iterCounter(0), etaTarget(5*pow(10, -3)), initialTemperature(0.1),
+: iterMax(10000), iterCounter(0), etaTarget(0), initialTemperature(0.1),
   alpha(1.0), beta(1.0), net()
 {
     this->currentTemperature = this->initialTemperature;
 }
 
 Iterator::Iterator(ElasticNet *net)
-: iterMax(10000), iterCounter(0), etaTarget(5*pow(10, -3)), initialTemperature(0.1), alpha(1.0), beta(1.0), net(net)
+: iterMax(10000), iterCounter(0), etaTarget(0), initialTemperature(0.1), alpha(1.0), beta(1.0), net(net)
 {
-	this->currentTemperature = this->initialTemperature;
+    this->currentTemperature = this->initialTemperature;
 }
 
 Iterator::Iterator(ElasticNet *net, double alpha, double beta, double temperature)
@@ -26,7 +25,7 @@ Iterator::Iterator(ElasticNet *net, double alpha, double beta, double temperatur
 }
 
 void Iterator::setInitialTemperature(double temp){
- 	this->initialTemperature = temp;
+    this->initialTemperature = temp;
  }
 
 void Iterator::setCurrentTemperature(){
@@ -34,27 +33,27 @@ void Iterator::setCurrentTemperature(){
  }
 
 void Iterator::setIterMax(int iterMax){
- 	this->iterMax = iterMax;
+    this->iterMax = iterMax;
  }
 
 void Iterator::setAlpha(double alpha){
-	this->alpha = alpha;
+    this->alpha = alpha;
  }
 
 void Iterator::setBeta(double beta){
-	this->beta = beta;
+    this->beta = beta;
  }
 
 void Iterator::setNet(ElasticNet *net){
-	this->net = net;
+    this->net = net;
  }
 
 double Iterator::getInitialTemperature(){
- 	return this->initialTemperature;
+    return this->initialTemperature;
  }
 
 double Iterator::getCurrentTemperature(){
-	return this->currentTemperature;
+    return this->currentTemperature;
 }
 
 double Iterator::getT(){
@@ -62,24 +61,26 @@ double Iterator::getT(){
 }
 
 double Iterator::getIterMax(){
-	return this->iterMax;
+    return this->iterMax;
 }
 
 double Iterator::getAlpha(){
-	return this->alpha;
+    return this->alpha;
 }
 
 double Iterator::getBeta(){
-	return this->beta;
+    return this->beta;
 }
 
 ElasticNet* Iterator::getNet(){
-	return this->net;
+    return this->net;
 }
 
- void Iterator::apply(){
+void Iterator::apply(){
 
      this->setCurrentTemperature();
+     double K = this->getCurrentTemperature();
+     double T = this->getT();
 
      int numberNodes = this->net->getNumberNodes();
 
@@ -88,21 +89,26 @@ ElasticNet* Iterator::getNet(){
      vector<Point> nodes = this->net->getNodes();
      vector<Point> cities = this->net->getCities();
 
-
-      //used to calc vIA
      Point deltaYa = Point();
 
      int a_counter = 0;
 
      for(auto a = nodes.begin(); a != nodes.end(); a++){
-        double vIA = 0;
+
+         double vIA = 0;
+
          for(auto i = cities.begin(); i != cities.end(); i++){
-            double denominator = 0;
+
+             double denominator = 0; //used to calc vIA
+
              for(auto b = nodes.begin(); b != nodes.end(); b++){
                  //iterate through nodes again to calc denominator of vIA
-                 denominator += exp(-(pow((*i-*b).magnitude(),2))/getT());
+                 //denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
+                 denominator += exp(-(pow((*i-*b).manhattanDistance(),2))/T);
+                 //sum(b e nodes) e^((|x_i - y_b|^2)/T)
              }
-             vIA = exp(-(pow((*i - *a).magnitude(),2))/getT())/denominator;
+             vIA = exp(-(pow((*i - *a).manhattanDistance(),2))/T)/denominator;
+             //e^((|x_i - y_a|^2)/T) / sum(b e nodes) e^((|x_i - y_b|^2)/T)
 
              deltaYa += (*i - *a) * vIA;
 
@@ -119,64 +125,53 @@ ElasticNet* Iterator::getNet(){
          if (right >= nodes.end())
              right -= numberNodes;
 
-         deltaYa += (*left + *right - (*a * 2)) * getBeta()*getCurrentTemperature();
-                                     //c++ doesnt support modulo op. with negative values
-
+         deltaYa += (*left + *right - (*a * 2)) * getBeta()*K;
          deltaY[a_counter] = deltaYa;
-
 
          //reset
          deltaYa = Point();
-
          a_counter++;
 
      }
 
      a_counter = 0;
 
-         for(int a = 0; a < net->getNumberNodes(); a++){
+     for(int a = 0; a < net->getNumberNodes(); a++){
+             //net->getNodes()[a] += deltaY[a]; ging nicht
              net->changeNet(a, deltaY[a]);
         }
 
 
  iterCounter += 1;
 
-}
-
- double Iterator::calc_eta(){
-
-    double dist = 0;
-    double distMin = 100000;
-    double distMax = -100000;
-
-    vector<Point> nodes = this->net->getNodes();
-    vector<Point> cities = this->net->getCities();
-
-    for(auto i = cities.begin(); i != cities.end(); i++){
-        for(auto a = nodes.begin(); a != nodes.end(); a++){
-            dist = (*i - *a).magnitude();
-            distMin = min(dist, distMin);
-        }
-        distMax = max(distMin, distMax);
-    }
-
-    return distMax;
-
  }
+
+
+double Iterator::calcEta(){
+
+   double dist = 0;
+   double distMin = 100000;
+   double distMax = -100000;
+
+   vector<Point> nodes = this->net->getNodes();
+   vector<Point> cities = this->net->getCities();
+
+   for(auto i = cities.begin(); i != cities.end(); i++){
+       for(auto a = nodes.begin(); a != nodes.end(); a++){
+           dist = (*i - *a).euclidianDistance();
+           distMin = min(dist, distMin);
+       }
+       distMax = max(distMin, distMax);
+   }
+
+   return distMax;
+
+}
 
 void Iterator::solve(){
 
-//	for(auto iterator=0; iterator < this->iterMax; iterator++){
-
-//		// Implement if-statement to check precision etaTarget here
-//		this->apply();
-//	}
-    while((calc_eta() > etaTarget)||(iterCounter < iterMax)){
-        apply();
-    }
+   while((calcEta() > etaTarget)||(iterCounter < iterMax)){
+       apply();
+   }
 
 }
-
-// void Iterator::test(){
-// 	this->net->setRadius(2.0);
-// }
