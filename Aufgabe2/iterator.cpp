@@ -1,8 +1,9 @@
 #include "iterator.h"
-#include "elasticNet.h"
+#include "elasticnet.h"
 #include "point.h"
-#include "math.h"
-#include <iostream> //testing
+#include <cmath>
+#define limit 0.01
+
 
 using namespace std;
 
@@ -45,6 +46,10 @@ void Iterator::setBeta(double beta){
     this->beta = beta;
  }
 
+void Iterator::setEtaTarget(double eta){
+    this->etaTarget = eta;
+}
+
 void Iterator::setNet(ElasticNet *net){
     this->net = net;
  }
@@ -73,111 +78,146 @@ double Iterator::getBeta(){
     return this->beta;
 }
 
+double Iterator::getEtaTarget(){
+    return this->etaTarget;
+}
+
 ElasticNet* Iterator::getNet(){
     return this->net;
 }
 
 void Iterator::apply(){
 
-    setCurrentTemperature();
+     this->setCurrentTemperature();
+     double K = this->getCurrentTemperature();
+     double T = this->getT();
 
-    int numberNodes = net->getNumberNodes();
+     int numberNodes = this->net->getNumberNodes();
 
-    //set up array to save all deltaY values
-    Point * deltaY = new Point[numberNodes];
+     Point * deltaY = new Point[numberNodes];
 
-    double vIA = 0;
-    double denominator = 0; //used to calc vIA
-    Point deltaYa = Point();
+     vector<Point> nodes = this->net->getNodes();
+     vector<Point> cities = this->net->getCities();
+
+     Point deltaYa = Point();
+
+     int a_counter = 0;
+
+     for(auto a = nodes.begin(); a != nodes.end(); a++){
+
+         double vIA = 0;
+
+         for(auto i = cities.begin(); i != cities.end(); i++){
 
 
-    for(int a = 0; a < numberNodes; a++){
-        //iterate through all elastic net nodes
+             double denominator = 0; //used to calc vIA
 
-        for(int i = 0; i < net->getNumberCities(); i++){
-            //iterate through cities
-            for(int b = 0; b < numberNodes; b++){
-                //iterate through nodes again to calc denominator of vIA
-                denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
-            }
-            vIA = exp(-(pow((net->getCities()[i] - net->getNodes()[a]).magnitude(),2))/getT())/denominator;
+             for(auto b = nodes.begin(); b != nodes.end(); b++){
+                 //iterate through nodes again to calc denominator of vIA
+                 //denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
+                 denominator += exp(-(pow((*i-*b).manhattanDistance(),2))/T);
+                 //sum(b e nodes) e^((|x_i - y_b|^2)/T)
+             }
+             vIA = exp(-(pow((*i - *a).manhattanDistance(),2))/T)/denominator;
+             //e^((|x_i - y_a|^2)/T) / sum(b e nodes) e^((|x_i - y_b|^2)/T)
 
-            deltaYa += (net->getCities()[i] - net->getNodes()[a]) * vIA;
+             deltaYa += (*i - *a) * vIA;
+
+
+         }
+
+         deltaYa *= getAlpha();
+
+         auto left = a-1;
+         auto right = a+1;
+
+         if (left < nodes.begin())
+             left += numberNodes;
+
+         if (right >= nodes.end())
+             right -= numberNodes;
+
+         deltaYa += (*left + *right - (*a * 2)) * getBeta()*K;
+         deltaY[a_counter] = deltaYa;
+
+         //reset
+         deltaYa = Point();
+         a_counter++;
+
+
+     }
+
+     a_counter = 0;
+
+     double dist = 0;
+     double distMin = 1;
+
+     for(auto i = cities.begin(); i != cities.end(); i++){
+         for(auto a = nodes.begin(); a != nodes.end(); a++){
+             dist = (*i - *a).euclidianDistance();
+             distMin = min(dist, distMin);
+             if(distMin<limit){
+                 deltaY[a_counter] = Point(0,0);
+
+             }
+
+    a_counter++;
+         }
+         a_counter = 0;
+
+     }
+
+     for(int a = 0; a < net->getNumberNodes(); a++){
+             //net->getNodes()[a] += deltaY[a]; ging nicht
+             net->changeNet(a, deltaY[a]);
+
 
         }
 
-        deltaYa *= getAlpha();
 
-        deltaYa += (net->getNodes()[((a-1)%numberNodes + numberNodes)%numberNodes] + net->getNodes()[a] - (net->getNodes()[(a+1)%numberNodes] * 2)) * getBeta()*getCurrentTemperature();
-                                    //c++ doesnt support modulo op. with negative values
+ iterCounter += 1;
 
-        deltaY[a] = deltaYa;
+ }
 
 
-        //reset
-        denominator = 0;
-        deltaYa = Point();
+double Iterator::calcEta(){
 
+   double dist = 0;
+   double distMin = 100000;
+   double distMax = -100000;
 
-    }
+   vector<Point> nodes = this->net->getNodes();
+   vector<Point> cities = this->net->getCities();
 
-    //at this point all deltaYa are calculated and saved in deltaY
-    //in the next loop all yA get changed by deltaYa
+   for(auto i = cities.begin(); i != cities.end(); i++){
+       for(auto a = nodes.begin(); a != nodes.end(); a++){
+           dist = (*i - *a).euclidianDistance();
+           distMin = min(dist, distMin);
 
-    for(int a = 0; a < net->getNumberNodes(); a++){
-        //net->getNodes()[a] += deltaY[a]; ging nicht
-        net->changeNet(a, deltaY[a]);
-        cout << net->getNodes()[a].x << " " << net->getNodes()[a].y << endl ;
-    }
+       }
+       distMax = max(distMin, distMax);
+   }
 
+   return distMax;
 
 }
-
-// void Iterator::apply(){
-
-//     this->setCurrentTemperature();
-//     double K = this->getCurrentTemperature();
-//     double T = this->getT();
-
-//     int numberNodes = this->net->getNumberNodes();
-
-//     Point * deltaY = new Point[numberNodes];
-
-//     vector<Point> y = this->net->getNodes();
-//     vector<Point> x = this->net->getCities();
-
-//     int a_counter = 0;
-
-//     for(auto a = y.begin(); a != y.end(); ++a){
-
-//         auto aMinusOne = a-1;
-//         auto aPlusOne = a+1;
-
-//         if (aMinusOne < y.begin())
-//             aMinusOne += numberNodes;
-
-//         if (aPlusOne+1 >= y.end())
-//             aPlusOne -= numberNodes;
-
-
-
-//         a_counter = 0;
-
-//     }
-// }
-
-
-
 
 void Iterator::solve(){
 
-    for(iterCounter = 0; iterCounter < this->iterMax; ++iterCounter){
-
-        // Implement if-statement to check precision etaTarget here
-        this->apply();
-    }
+   while((calcEta() > etaTarget)&&(iterCounter < iterMax)){
+       apply();
+   }
 }
 
-// void Iterator::test(){
-// 	this->net->setRadius(2.0);
-// }
+//double dist=0;                                               //+++++++++++
+//for(auto i = cities.begin(); i != cities.end(); i++){
+//    for(auto a = nodes.begin(); a != nodes.end(); a++){
+//        dist = (*i - *a).euclidianDistance();
+//        if (dist<limit){}else {
+//
+//        }
+//    }
+//}
+
+
+

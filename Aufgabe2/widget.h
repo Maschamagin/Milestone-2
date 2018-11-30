@@ -3,12 +3,13 @@
 
 #include <QWidget>
 #include <QPushButton>
-#include "elasticnet.h"
-#include "point.h"
 #include <QPaintEvent>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QLabel>
+#include "elasticnet.h"
+#include "point.h"
+#include "iterator.h"
 
 
 class Widget : public QWidget
@@ -22,14 +23,20 @@ public:
 
 private slots:
 
-   void triggerShow();
+   void triggerApply();
+   void triggerClear();
+   void triggerSolve();
 
 private:
-    QPushButton *addCity, *showNet;
-    QSpinBox *a, *b, *itermax;
-    QDoubleSpinBox *K, *cvratio, *r;
-    QLabel *text_a, *text_b, *text_K, *text_itermax,*text_cvratio, *text_r;
+
     ElasticNet *net;
+    Iterator *iterator;
+
+    QTimer *timerApply;
+    QPushButton *clearNet, *solveNet, *start, *stop;
+    QSpinBox *itermax;
+    QDoubleSpinBox *a, *b, *K, *cvratio, *r;
+    QLabel *text_a, *text_b, *text_K, *text_itermax,*text_cvratio, *text_r;
 
 };
 

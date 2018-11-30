@@ -37,8 +37,6 @@ HEADERS += \
     elasticnet.h \
     iterator.h
 
-FORMS += \
-        widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

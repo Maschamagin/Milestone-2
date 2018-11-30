@@ -4,20 +4,34 @@
 #include "widget.h"
 #include "point.h"
 #include <QDebug>
+#include <QTimer>
+
+#define STARTX 150
+#define STARTY 100
+#define SCALE 300
 
 using namespace std;
-
 
 Widget::Widget(QWidget *parent, ElasticNet *net) :
     QWidget(parent), net(net)
 {
-    //initialize buttons
+    iterator = new Iterator(net);
 
-    addCity = new QPushButton("Add City",this);
-    addCity->setGeometry(10,10,100,30);
+    QPalette blackText;
+    blackText.setColor(QPalette::Text,Qt::black);
 
-    showNet = new QPushButton("Show Net",this);
-    showNet->setGeometry(10,40,100,30);
+    timerApply = new QTimer(this);
+
+    clearNet = new QPushButton("Clear Net",this);
+    clearNet->setGeometry(10,10,120,30);
+
+    solveNet = new QPushButton("Solve Net",this);
+    solveNet->setGeometry(10,40,120,30);
+
+    start = new QPushButton("Start Iterator",this);
+    start->setGeometry(130,10,120,30);
+    stop = new QPushButton("Stop Iterator", this);
+    stop->setGeometry(130,40,120,30);
 
     //initialize textlabels
 
@@ -47,39 +61,30 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_r->setText("Radius");
 
 
+    //Initialize spinboxes
 
-
-    //initialize spinbox
-
-    a = new QSpinBox(this);
-    b = new QSpinBox(this);
+    a = new QDoubleSpinBox(this);
+    b = new QDoubleSpinBox(this);
     K = new QDoubleSpinBox(this);
     cvratio = new QDoubleSpinBox(this);
     r = new QDoubleSpinBox(this);
 
     itermax = new QSpinBox(this);
 
-    //set property of spinbox
+    //Set properties of Spinboxex
 
-    //set geometry
-
+    a->setPalette(blackText);
     a->setGeometry(10,100,80,20);
+    b->setPalette(blackText);
     b->setGeometry(10,145,80,20);
+    K->setPalette(blackText);
     K->setGeometry(10,190,80,20);
+    itermax->setPalette(blackText);
     itermax->setGeometry(10,235,80,20);
+    cvratio->setPalette(blackText);
     cvratio->setGeometry(10,280,80,20);
+    r->setPalette(blackText);
     r->setGeometry(10,325,80,20);
-
-    //defult values
-
-    a->setValue(1);
-    b->setValue(1);
-    K->setValue(0.1);
-    itermax->setValue(10000);
-    cvratio->setValue(2.5);
-    r->setValue(0.1);
-
-    //set interval and steps of spinbox respectively doublespinbox
 
     a->setMinimum(0);
     a->setMaximum(1000);
@@ -105,42 +110,90 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     r->setMaximum(10);
     r->setSingleStep(0.1);
 
+    a->setValue(1);
+    b->setValue(1);
+    K->setValue(0.1);
+    itermax->setValue(10000);
+    cvratio->setValue(2.5);
+    r->setValue(0.1);
 
+    // Connect all spinboxes to respective iterator slots
 
+    connect(a,SIGNAL(valueChanged(double)),iterator,SLOT(setAlpha(double)));
+    connect(b,SIGNAL(valueChanged(double)),iterator,SLOT(setBeta(double)));
+    connect(K,SIGNAL(valueChanged(double)),iterator,SLOT(setInitialTemperature(double)));
+    connect(itermax,SIGNAL(valueChanged(int)),iterator,SLOT(setIterMax(int)));
+    connect(cvratio,SIGNAL(valueChanged(double)),net,SLOT(setCVRatio(double)));
+    connect(r,SIGNAL(valueChanged(double)),net,SLOT(setRadius(double)));
 
+    // Connect timer to apply function
+    timerApply->setInterval(50);
+    connect(timerApply,SIGNAL(timeout()),this,SLOT(triggerApply()));
 
-
-
-    //connect statements
-
-    connect(showNet,SIGNAL(clicked()),this,SLOT(triggerShow()));
-
-    connect(a,SIGNAL(valueChanged(int)),this,SLOT(getAlpha(int)));
-    connect(b,SIGNAL(valueChanged(int)),this,SLOT(getBeta(int)));
-    connect(K,SIGNAL(valueChanged(int)),this,SLOT(getCurrentTemperature(int)));
-    connect(itermax,SIGNAL(valueChanged(int)),this,SLOT(getIterMax(int)));
-    connect(cvratio,SIGNAL(valueChanged(int)),this,SLOT(getCVRatio(int)));
-    connect(r,SIGNAL(valueChanged(int)),this,SLOT(getRadius(int)));
+    // Connect buttons
+    connect(clearNet,SIGNAL(clicked()),this,SLOT(triggerClear()));
+    connect(solveNet,SIGNAL(clicked()),this,SLOT(triggerSolve()));
+    connect(start,SIGNAL(clicked()),timerApply,SLOT(start()));
+    connect(stop,SIGNAL(clicked()),timerApply,SLOT(stop()));
 }
 
 void Widget::paintEvent(QPaintEvent *event){
 
     QPainter painter(this);
+    painter.setPen(QPen(Qt::white,2));
+    painter.drawRect(QRectF(STARTX,STARTY,SCALE+10,SCALE+10));
 
     if(net){
+        // Draw all nodes and connecting lines
         vector<Point> nodes = net->getNodes();
         for(auto i = nodes.begin();i != nodes.end(); ++i){
-            QRectF node(100+(200*i->x),100+(200*i->y),10,10);
-            qDebug() << i->x << "," << i->y << endl;
-            painter.drawRect(node);
 
+            // Set color to red for nodes
+            painter.setBrush(QBrush(Qt::red));
+            painter.setPen(Qt::red);
+
+            // Draw ellipse for each node
+            QRectF node(STARTX+(SCALE*i->x),STARTY+(SCALE*i->y),5,5);
+            // qDebug() << "Node: " << i->x << "," << i->y << endl;
+            painter.drawEllipse(node);
+
+            // Draw lines to neighbour node
+            auto nextI = i+1;
+            if (nextI >= nodes.end())
+                        nextI -= net->getNumberNodes();
+
+            QRectF nextNode(STARTX+(SCALE*nextI->x),STARTY+(SCALE*nextI->y),5,5);
+            painter.drawLine(STARTX+2.5+(SCALE*i->x),STARTY+2.5+(SCALE*i->y),
+                             STARTX+2.5+(SCALE*nextI->x),STARTY+2.5+(SCALE*nextI->y));
          }
+
+        // Draw all cities
+        vector<Point> cities = net->getCities();
+        for(auto i = cities.begin();i != cities.end(); ++i){
+            painter.setPen(Qt::white);
+            painter.setBrush(QBrush(Qt::black));
+            QRectF city(STARTX+(SCALE*i->x),STARTY+(SCALE*i->y),10,10);
+            // qDebug() << "City: " << i->x << "," << i->y << endl;
+            painter.drawRect(city);
+        }
     }
 
     painter.end();
-
 }
 
-void Widget::triggerShow(){
+void Widget::triggerApply(){
+    if(iterator->calcEta() > iterator->getEtaTarget()){
+        iterator->apply();
+    }
+    repaint();
+}
+
+void Widget::triggerClear(){
+    net->clearNet();
+    repaint();
+}
+
+void Widget::triggerSolve(){
+    iterator->solve();
     repaint();
 }

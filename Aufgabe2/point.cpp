@@ -1,8 +1,8 @@
 #include "point.h"
-#include <math.h>
+#include <cmath>
 #include <utility>
 
-// TODO: Abstand von zwei Points implementieren
+using namespace std;
 
 Point::Point()
 : x(0), y(0) {}
@@ -10,11 +10,9 @@ Point::Point()
 Point::Point(double x, double y)
 : x(x) , y(y) {}
 
-Point& Point::operator+(const Point& a){
-    x = x+a.x;
-    y = y+a.y;
+Point Point::operator+(const Point& a){
 
-    return *this;
+    return Point(x + a.x, y + a.y);
 }
 
 Point& Point::operator+=(const Point& a){
@@ -24,25 +22,20 @@ Point& Point::operator+=(const Point& a){
     return *this;
 }
 
-Point& Point::operator-(const Point& a){
-    x = x-a.x;
-    y = y-a.y;
+Point Point::operator-(const Point& a){
 
-    return *this;
+    return Point(x - a.x, y - a.y);
 }
 
 Point& Point::operator-=(const Point& a){
 
-    *this = *this-a;
+    *this = *this - a;
 
     return *this;
 }
 
-Point& Point::operator*(const double a){
-    x = x * a;
-    y = y * a;
-
-    return *this;
+Point Point::operator*(const double a){
+    return Point(x * a, y * a);
 }
 
 Point& Point::operator*=(const double a){
@@ -51,11 +44,8 @@ Point& Point::operator*=(const double a){
     return *this;
 }
 
-Point& Point::operator/(const double a){
-    x = x / a;
-    y = y / a;
-
-    return *this;
+Point Point::operator/(const double a){
+    return Point(x / a, y / a);
 }
 
 Point& Point::operator/=(const double a){
@@ -71,11 +61,11 @@ Point& Point::operator=(const Point a){
     return *this;
 }
 
-
-// Point Point::operator=(const Point& a){
-//     return Point(a.x,a.y);
-// }
-
-double Point::magnitude(){
+double Point::euclidianDistance(){
     return sqrt(x*x + y*y);
 }
+
+double Point::manhattanDistance(){
+    return abs(x)+abs(y);
+}
+

@@ -1,7 +1,8 @@
 #ifndef ITERATOR_H
 #define ITERATOR_H
 
-#include "elasticNet.h"
+#include "elasticnet.h"
+#include <QObject>
 
 class Iterable{
 
@@ -10,7 +11,8 @@ public:
 
 };
 
-class Iterator : public Iterable{
+class Iterator : public QObject, public Iterable{
+Q_OBJECT
 
 private:
 
@@ -21,24 +23,25 @@ private:
     double initialTemperature; // K(0) parameter
     double alpha; // Alpha parameter
     double beta; // Beta parameter
-    ElasticNet *net; // Pointer auf das übergebene Netz
+    ElasticNet *net; // Pointer on given net - changes are global!
 
-    // Wenn man in Iterator das Netz ändert, ist es global geändert
+public slots:
+
+    void solve();
+    void apply();
+    void setInitialTemperature(double temp);
+    void setIterMax(int iterMax);
+    void setAlpha(double alpha);
+    void setBeta(double beta);
+    void setEtaTarget(double eta);
 
 public:
-
-
 
     Iterator();
     Iterator(ElasticNet *net, double alpha, double beta, double temperature);
     Iterator(ElasticNet *net);
 
-    void setInitialTemperature(double temp);
     void setCurrentTemperature();
-    void setIterMax(int iterMax);
-    void setAlpha(double alpha);
-    void setBeta(double beta);
-
     void setNet(ElasticNet *net);
 
     double getInitialTemperature();
@@ -47,14 +50,11 @@ public:
     double getIterMax();
     double getAlpha();
     double getBeta();
+    double getEtaTarget();
 
-    // Mal schauen wie das funktioniert oder ob wir das Net public machen
     ElasticNet* getNet();
 
-    void solve();
-    void apply();
-
-    // void test(); // Zum Testen ob Änderungen am Netz global sind
+    double calcEta();
 };
 
 #endif
