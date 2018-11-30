@@ -7,6 +7,7 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QLabel>
+#include <QSlider>
 #include "elasticnet.h"
 #include "point.h"
 #include "iterator.h"
@@ -20,12 +21,14 @@ public:
     explicit Widget(QWidget *parent = nullptr, ElasticNet *net = nullptr);
 
     void paintEvent(QPaintEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
 private slots:
 
    void triggerApply();
    void triggerClear();
    void triggerSolve();
+   void changeSpeed(int speed);
 
 private:
 
@@ -35,6 +38,7 @@ private:
     QTimer *timerApply;
     QPushButton *clearNet, *solveNet, *start, *stop;
     QSpinBox *itermax;
+    QSlider *iteratorSlider;
     QDoubleSpinBox *a, *b, *K, *cvratio, *r;
     QLabel *text_a, *text_b, *text_K, *text_itermax,*text_cvratio, *text_r;
 

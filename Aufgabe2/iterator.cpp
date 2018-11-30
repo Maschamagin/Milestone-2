@@ -178,7 +178,13 @@ double Iterator::calcEta(){
 
 void Iterator::solve(){
 
+   this->iterCounter=0;
+
    while((calcEta() > etaTarget)&&(iterCounter < iterMax)){
        apply();
    }
+}
+
+void Iterator::setIterCounter(int iterCounter){
+    this->iterCounter = iterCounter;
 }

@@ -41,6 +41,7 @@ public:
     Iterator(ElasticNet *net, double alpha, double beta, double temperature);
     Iterator(ElasticNet *net);
 
+    void setIterCounter(int iterCounter);
     void setCurrentTemperature();
     void setNet(ElasticNet *net);
 

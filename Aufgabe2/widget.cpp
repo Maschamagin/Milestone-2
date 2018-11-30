@@ -1,6 +1,7 @@
 #include <QRectF>
 #include <QPainter>
 #include <vector>
+#include <cmath>
 #include "widget.h"
 #include "point.h"
 #include <QDebug>
@@ -16,6 +17,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     QWidget(parent), net(net)
 {
     iterator = new Iterator(net);
+    iterator->setEtaTarget(0.005);
 
     QPalette blackText;
     blackText.setColor(QPalette::Text,Qt::black);
@@ -32,6 +34,12 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     start->setGeometry(130,10,120,30);
     stop = new QPushButton("Stop Iterator", this);
     stop->setGeometry(130,40,120,30);
+
+    iteratorSlider = new QSlider(Qt::Horizontal,this);
+    iteratorSlider->setGeometry(260,25,200,30);
+    iteratorSlider->setMaximum(10);
+    iteratorSlider->setMinimum(1);
+    iteratorSlider->setValue(1);
 
     //initialize textlabels
 
@@ -127,7 +135,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     connect(r,SIGNAL(valueChanged(double)),net,SLOT(setRadius(double)));
 
     // Connect timer to apply function
-    timerApply->setInterval(50);
+    timerApply->setInterval(100);
     connect(timerApply,SIGNAL(timeout()),this,SLOT(triggerApply()));
 
     // Connect buttons
@@ -135,6 +143,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     connect(solveNet,SIGNAL(clicked()),this,SLOT(triggerSolve()));
     connect(start,SIGNAL(clicked()),timerApply,SLOT(start()));
     connect(stop,SIGNAL(clicked()),timerApply,SLOT(stop()));
+    connect(iteratorSlider,SIGNAL(valueChanged(int)),this,SLOT(changeSpeed(int)));
 }
 
 void Widget::paintEvent(QPaintEvent *event){
@@ -172,13 +181,48 @@ void Widget::paintEvent(QPaintEvent *event){
         for(auto i = cities.begin();i != cities.end(); ++i){
             painter.setPen(Qt::white);
             painter.setBrush(QBrush(Qt::black));
-            QRectF city(STARTX+(SCALE*i->x),STARTY+(SCALE*i->y),10,10);
+
+            QRectF city(STARTX-5+(SCALE*i->x),STARTY-5+(SCALE*i->y),10,10);
             // qDebug() << "City: " << i->x << "," << i->y << endl;
             painter.drawRect(city);
         }
     }
 
     painter.end();
+}
+
+void Widget::mousePressEvent(QMouseEvent *event){
+
+    // Read x- and y-mouse position
+    double xpos = event->x();
+    double ypos = event->y();
+
+    // Check if mouse is in range of map
+    if(xpos > STARTX && xpos < STARTX+SCALE
+       && ypos > STARTY && ypos < STARTY+SCALE){
+
+        // Calculate the real net position
+        double netX = (xpos-(STARTX+SCALE))/SCALE + 1;
+        double netY = (ypos-(STARTY+SCALE))/SCALE + 1;
+
+        vector<Point> cities = net->getCities();
+
+        bool cityNearby = false;
+
+        for(auto i = cities.begin(); i != cities.end();i++){
+            double minDist = 2 * iterator->getEtaTarget();
+
+            if(abs(netX-(i->x)) < minDist && abs(netY-(i->y)) < minDist)
+                cityNearby = true;
+        }
+
+        // Add the city to the map
+        if(!cityNearby){
+            net->addCity(netX,netY);
+        }
+    }
+
+    repaint();
 }
 
 void Widget::triggerApply(){
@@ -190,10 +234,16 @@ void Widget::triggerApply(){
 
 void Widget::triggerClear(){
     net->clearNet();
+
+    iterator->setIterCounter(0);
     repaint();
 }
 
 void Widget::triggerSolve(){
     iterator->solve();
     repaint();
+}
+
+void Widget::changeSpeed(int speed){
+    timerApply->setInterval(100/speed);
 }
