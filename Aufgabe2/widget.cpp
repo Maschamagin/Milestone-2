@@ -16,12 +16,15 @@ using namespace std;
 Widget::Widget(QWidget *parent, ElasticNet *net) :
     QWidget(parent), net(net)
 {
+    // Initialize a new iterator and set Eta Target to default
     iterator = new Iterator(net);
     iterator->setEtaTarget(0.005);
 
+    // Define Palette to display black text
     QPalette blackText;
     blackText.setColor(QPalette::Text,Qt::black);
 
+    // Define timer and interface elements
     timerApply = new QTimer(this);
 
     clearNet = new QPushButton("Clear Net",this);
@@ -41,16 +44,12 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     iteratorSlider->setMinimum(1);
     iteratorSlider->setValue(1);
 
-    //initialize textlabels
-
     text_a = new QLabel(this);
     text_b = new QLabel(this);
     text_K = new QLabel(this);
     text_itermax = new QLabel(this);
     text_cvratio = new QLabel(this);
     text_r = new QLabel(this);
-
-    //set geometry of textlabel
 
     text_a->setGeometry(10,80,80,15);
     text_b->setGeometry(10,125,80,15);
@@ -59,17 +58,12 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_cvratio->setGeometry(10,260,80,15);
     text_r->setGeometry(10,305,80,15);
 
-    //set Text of Labels
-
     text_a->setText("Alpha");
     text_b->setText("Beta");
     text_K->setText("Temperature");
     text_itermax->setText("Itermax");
     text_cvratio->setText("CVRatio");
     text_r->setText("Radius");
-
-
-    //Initialize spinboxes
 
     a = new QDoubleSpinBox(this);
     b = new QDoubleSpinBox(this);
@@ -78,8 +72,6 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     r = new QDoubleSpinBox(this);
 
     itermax = new QSpinBox(this);
-
-    //Set properties of Spinboxex
 
     a->setPalette(blackText);
     a->setGeometry(10,100,80,20);
@@ -125,7 +117,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     cvratio->setValue(2.5);
     r->setValue(0.1);
 
-    // Connect all spinboxes to respective iterator slots
+    // Connect all SpinBoxes to respective properties of net and iterator
 
     connect(a,SIGNAL(valueChanged(double)),iterator,SLOT(setAlpha(double)));
     connect(b,SIGNAL(valueChanged(double)),iterator,SLOT(setBeta(double)));
@@ -138,7 +130,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     timerApply->setInterval(100);
     connect(timerApply,SIGNAL(timeout()),this,SLOT(triggerApply()));
 
-    // Connect buttons
+    // Connect buttons to iterator and net slots
     connect(clearNet,SIGNAL(clicked()),this,SLOT(triggerClear()));
     connect(solveNet,SIGNAL(clicked()),this,SLOT(triggerSolve()));
     connect(start,SIGNAL(clicked()),timerApply,SLOT(start()));
@@ -148,6 +140,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
 
 void Widget::paintEvent(QPaintEvent *event){
 
+    // Initialize painter and draw map borders
     QPainter painter(this);
     painter.setPen(QPen(Qt::white,2));
     painter.drawRect(QRectF(STARTX,STARTY,SCALE+10,SCALE+10));
@@ -205,8 +198,8 @@ void Widget::mousePressEvent(QMouseEvent *event){
         double netX = (xpos-(STARTX+SCALE))/SCALE + 1;
         double netY = (ypos-(STARTY+SCALE))/SCALE + 1;
 
+        // Check if a city is in range of 2*EtaTarget
         vector<Point> cities = net->getCities();
-
         bool cityNearby = false;
 
         for(auto i = cities.begin(); i != cities.end();i++){
@@ -216,34 +209,45 @@ void Widget::mousePressEvent(QMouseEvent *event){
                 cityNearby = true;
         }
 
-        // Add the city to the map
+        // If city placement is valid, add the city to the net
         if(!cityNearby){
             net->addCity(netX,netY);
         }
     }
 
+    // Repaint as net has changed
     repaint();
 }
 
 void Widget::triggerApply(){
+    // Apply the algorithm until given precision target is reached
     if(iterator->calcEta() > iterator->getEtaTarget()){
         iterator->apply();
     }
+    // Repaint as net has changed
     repaint();
 }
 
 void Widget::triggerClear(){
+    // Clear the net
     net->clearNet();
 
+    // Reset the iterator
     iterator->setIterCounter(0);
+
+    // Repaint as net has changed
     repaint();
 }
 
 void Widget::triggerSolve(){
+    // Solve the whole problem at once and visualize afterwards
+    // Fast and exact way of solving, much faster than with visualization
     iterator->solve();
+    // Repaint as net has changed
     repaint();
 }
 
 void Widget::changeSpeed(int speed){
+    // Change speed of Timer
     timerApply->setInterval(100/speed);
 }

@@ -20,21 +20,29 @@ class Widget : public QWidget
 public:
     explicit Widget(QWidget *parent = nullptr, ElasticNet *net = nullptr);
 
+    // Triggers the painting of the map including the current status of the net
     void paintEvent(QPaintEvent *event);
+    // Checks if mouse was clicked on the map and adds a city on that position
     void mousePressEvent(QMouseEvent *event);
 
 private slots:
 
-   void triggerApply();
-   void triggerClear();
-   void triggerSolve();
-   void changeSpeed(int speed);
+    // Called by Timer, applies iterator once and repaints
+    void triggerApply();
+    // Called by "ClearNet"-Button and clears the net
+    void triggerClear();
+    // Called b "SolveNet"-Button and solves the net at once (no visualization of steps)
+    void triggerSolve();
+    // Called by a changed Value in the Slider, adjustes the speed of the "apply"-Timer
+    void changeSpeed(int speed);
 
 private:
 
+    // Net and iterator as attributes of the widget
     ElasticNet *net;
     Iterator *iterator;
 
+    // Interface elements
     QTimer *timerApply;
     QPushButton *clearNet, *solveNet, *start, *stop;
     QSpinBox *itermax;
