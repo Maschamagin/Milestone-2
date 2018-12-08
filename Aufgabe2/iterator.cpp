@@ -3,6 +3,8 @@
 #include "point.h"
 #include <cmath>
 
+#define limit 0.003
+
 using namespace std;
 
 

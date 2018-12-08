@@ -18,7 +18,6 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
 {
     // Initialize a new iterator and set Eta Target to default
     iterator = new Iterator(net);
-    iterator->setEtaTarget(0.005);
 
     // Define Palette to display black text
     QPalette blackText;
@@ -50,6 +49,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_itermax = new QLabel(this);
     text_cvratio = new QLabel(this);
     text_r = new QLabel(this);
+    text_etaTarget = new QLabel(this);
 
     text_a->setGeometry(10,80,80,15);
     text_b->setGeometry(10,125,80,15);
@@ -57,6 +57,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_itermax->setGeometry(10,215,80,15);
     text_cvratio->setGeometry(10,260,80,15);
     text_r->setGeometry(10,305,80,15);
+    text_etaTarget->setGeometry(10,350,80,15);
 
     text_a->setText("Alpha");
     text_b->setText("Beta");
@@ -64,12 +65,14 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_itermax->setText("Itermax");
     text_cvratio->setText("CVRatio");
     text_r->setText("Radius");
+    text_etaTarget->setText("Accuracy");
 
     a = new QDoubleSpinBox(this);
     b = new QDoubleSpinBox(this);
     K = new QDoubleSpinBox(this);
     cvratio = new QDoubleSpinBox(this);
     r = new QDoubleSpinBox(this);
+    etaTarget = new QDoubleSpinBox(this);
 
     itermax = new QSpinBox(this);
 
@@ -85,6 +88,10 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     cvratio->setGeometry(10,280,80,20);
     r->setPalette(blackText);
     r->setGeometry(10,325,80,20);
+    etaTarget->setPalette(blackText);
+    etaTarget->setGeometry(10,370,80,20);
+
+
 
     a->setMinimum(0);
     a->setMaximum(1000);
@@ -110,12 +117,18 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     r->setMaximum(10);
     r->setSingleStep(0.1);
 
+    etaTarget->setMinimum(0);
+    etaTarget->setMaximum(1);
+    etaTarget->setSingleStep(0.01);
+
+
     a->setValue(1);
     b->setValue(1);
     K->setValue(0.1);
     itermax->setValue(10000);
     cvratio->setValue(2.5);
     r->setValue(0.1);
+    etaTarget->setValue(0.05);
 
     // Connect all SpinBoxes to respective properties of net and iterator
 
@@ -125,6 +138,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     connect(itermax,SIGNAL(valueChanged(int)),iterator,SLOT(setIterMax(int)));
     connect(cvratio,SIGNAL(valueChanged(double)),net,SLOT(setCVRatio(double)));
     connect(r,SIGNAL(valueChanged(double)),net,SLOT(setRadius(double)));
+    connect(etaTarget,SIGNAL(valueChanged(double)),iterator, SLOT(setEtaTarget()));
 
     // Connect timer to apply function
     timerApply->setInterval(100);
