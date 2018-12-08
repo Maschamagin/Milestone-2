@@ -58,7 +58,7 @@ void Iterator::setBeta(double beta){
  }
 
 void Iterator::setEtaTarget(double eta){
-    this->etaTarget = eta;
+    this->etaTarget = eta*pow(10,-3);
 }
 
 void Iterator::setNet(ElasticNet *net){

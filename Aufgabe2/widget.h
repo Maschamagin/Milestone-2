@@ -45,9 +45,9 @@ private:
     // Interface elements
     QTimer *timerApply;
     QPushButton *clearNet, *solveNet, *start, *stop;
-    QSpinBox *itermax;
+    QSpinBox *itermax, *etaTarget;
     QSlider *iteratorSlider;
-    QDoubleSpinBox *a, *b, *K, *cvratio, *r, *etaTarget;
+    QDoubleSpinBox *a, *b, *K, *cvratio, *r;
     QLabel *text_a, *text_b, *text_K, *text_itermax,*text_cvratio, *text_r, *text_etaTarget;
 
 };

@@ -57,7 +57,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_itermax->setGeometry(10,215,80,15);
     text_cvratio->setGeometry(10,260,80,15);
     text_r->setGeometry(10,305,80,15);
-    text_etaTarget->setGeometry(10,350,80,15);
+    text_etaTarget->setGeometry(10,350,100,15);
 
     text_a->setText("Alpha");
     text_b->setText("Beta");
@@ -65,14 +65,14 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     text_itermax->setText("Itermax");
     text_cvratio->setText("CVRatio");
     text_r->setText("Radius");
-    text_etaTarget->setText("Accuracy");
+    text_etaTarget->setText("Accuracy (*10^-3)");
 
     a = new QDoubleSpinBox(this);
     b = new QDoubleSpinBox(this);
     K = new QDoubleSpinBox(this);
     cvratio = new QDoubleSpinBox(this);
     r = new QDoubleSpinBox(this);
-    etaTarget = new QDoubleSpinBox(this);
+    etaTarget = new QSpinBox(this);
 
     itermax = new QSpinBox(this);
 
@@ -118,8 +118,8 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     r->setSingleStep(0.1);
 
     etaTarget->setMinimum(0);
-    etaTarget->setMaximum(1);
-    etaTarget->setSingleStep(0.01);
+    etaTarget->setMaximum(1000);
+    etaTarget->setSingleStep(1);
 
 
     a->setValue(1);
@@ -128,7 +128,7 @@ Widget::Widget(QWidget *parent, ElasticNet *net) :
     itermax->setValue(10000);
     cvratio->setValue(2.5);
     r->setValue(0.1);
-    etaTarget->setValue(0.05);
+    etaTarget->setValue(5);
 
     // Connect all SpinBoxes to respective properties of net and iterator
 
