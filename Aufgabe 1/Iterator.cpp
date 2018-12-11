@@ -1,177 +1,207 @@
-#include "iterator.h"
-#include "elasticnet.h"
-#include "point.h"
-#include "math.h"
+//
+// Created by user on 03.12.18.
+//
+#include <math.h>
+#include <algorithm>
+#include <cmath>
+#include "Iterator.h"
+#include "elastic_net.h"
+#include <vector>
+#define REDUCE
 
-using namespace std;
+typedef::vector <tuple<int, int> > tuple_list;
 
-Iterator::Iterator()
-: iterMax(10000), iterCounter(0), etaTarget(0), initialTemperature(0.1),
-  alpha(1.0), beta(1.0), net()
-{
-    this->currentTemperature = this->initialTemperature;
+Iterator::Iterator() {
+    //defining attributes as asked for test cases
+    iter_max = 10000, n = 0, eta = 0.005, initial_temperature = 0.1,
+    alpha = 1.0, beta = 1.0;
+
+    //K(n = 0) is initialized
+    this->temperature_development = this->initial_temperature;
 }
 
-Iterator::Iterator(ElasticNet *net)
-: iterMax(10000), iterCounter(0), etaTarget(0), initialTemperature(0.1), alpha(1.0), beta(1.0), net(net)
-{
-    this->currentTemperature = this->initialTemperature;
+//set iteration counter
+void Iterator::set_n(int n){
+    this -> n = n;
 }
 
-Iterator::Iterator(ElasticNet *net, double alpha, double beta, double temperature)
-: iterMax(10000), etaTarget(0), initialTemperature(temperature), alpha(alpha), beta(beta), net(net)
-{
-    this->currentTemperature = this->initialTemperature;
+// get the number of iterations
+int Iterator::get_n(){
+    return this-> n;
 }
 
-void Iterator::setInitialTemperature(double temp){
-    this->initialTemperature = temp;
- }
-
-void Iterator::setCurrentTemperature(){
-    this->currentTemperature = max(pow(0.99,floor(iterCounter/50))*getInitialTemperature(), 0.01);
- }
-
-void Iterator::setIterMax(int iterMax){
-    this->iterMax = iterMax;
- }
-
-void Iterator::setAlpha(double alpha){
-    this->alpha = alpha;
- }
-
-void Iterator::setBeta(double beta){
-    this->beta = beta;
- }
-
-void Iterator::setNet(ElasticNet *net){
-    this->net = net;
- }
-
-double Iterator::getInitialTemperature(){
-    return this->initialTemperature;
- }
-
-double Iterator::getCurrentTemperature(){
-    return this->currentTemperature;
+//set maximum of iteration until loop exit
+void Iterator::set_iter_max(int iter_max){
+    this-> iter_max = iter_max;
 }
 
-double Iterator::getT(){
-    return 2*pow(getCurrentTemperature(),2);
+//get maximum of iterations until loop exit
+int Iterator::get_iter_max() {
+    return this -> iter_max;
 }
 
-double Iterator::getIterMax(){
-    return this->iterMax;
+//set scale alpha
+void Iterator::set_alpha(double alpha){
+    this -> alpha = alpha;
 }
 
-double Iterator::getAlpha(){
-    return this->alpha;
+double Iterator::get_alpha() {
+    return this -> alpha;
 }
 
-double Iterator::getBeta(){
-    return this->beta;
+//set scale beta
+void Iterator::set_beta(double beta){
+    this -> beta = beta;
 }
 
-ElasticNet* Iterator::getNet(){
-    return this->net;
+double Iterator::get_beta() {
+    return this -> beta;
 }
 
-void Iterator::apply(){
+//set K(0)
+void Iterator::set_initial_temperature(double temp){
+    this->initial_temperature = temp;
+}
 
-     this->setCurrentTemperature();
-     double K = this->getCurrentTemperature();
-     double T = this->getT();
+double Iterator::get_initial_temperature(){
+    return this -> initial_temperature;
+}
 
-     int numberNodes = this->net->getNumberNodes();
+//set K(n)
+void Iterator::set_temperature_development(){
+    this -> temperature_development = max(pow(0.99,floor(n/50))*get_initial_temperature(), 0.01);
+};
 
-     Point * deltaY = new Point[numberNodes];
+double Iterator::get_temperature_development() {
+    return this -> temperature_development;
+}
 
-     vector<Point> nodes = this->net->getNodes();
-     vector<Point> cities = this->net->getCities();
+//get T(n)
+double Iterator::get_Tn(){
+    return 2 * pow(get_temperature_development(), 2.0);
+}
 
-     Point deltaYa = Point();
+//get precision of expanding elastic net
+double Iterator::get_eta(){
+    return this -> eta;
+}
 
-     int a_counter = 0;
 
-     for(auto a = nodes.begin(); a != nodes.end(); a++){
+//calculate Manhattan norm of a 2D-vector
+double Iterator::manhattan_distance(tuple<int, int> coordinates){
+    double coordinate_x = get<0>(coordinates);
+    double coordinate_y = get<1>(coordinates);
+    double manhattan_dist = (abs(coordinate_x) + abs(coordinate_y));
+    return manhattan_dist;
+}
 
-         double vIA = 0;
+//the coordinates are normed for test cases
+double Iterator::euclidian_distance(tuple<int, int> coordinates){
+    double coordinate_x = get<0>(coordinates);
+    double coordinate_y = get<1>(coordinates);
+    double euclidian_dist = sqrt((pow(abs(coordinate_x), 2)) + pow((abs(coordinate_y)), 2));
+    return euclidian_dist;
 
-         for(auto i = cities.begin(); i != cities.end(); i++){
+}
 
-             double denominator = 0; //used to calc vIA
+void Iterator::apply() {
+    tuple_list nodes = EN->getposition_of_circle_node();
+    tuple_list cities = EN->getpositioncity();
+    double K_n = get_temperature_development();
+    double T_n = get_Tn();
+    double sum_ny_i_a = 0;
+    double delta_y0;
+    double delta_y1;
 
-             for(auto b = nodes.begin(); b != nodes.end(); b++){
-                 //iterate through nodes again to calc denominator of vIA
-                 //denominator += exp(-(pow((net->getCities()[i] - net->getNodes()[b]).magnitude(),2))/getT());
-                 denominator += exp(-(pow((*i-*b).manhattanDistance(),2))/T);
-                 //sum(b e nodes) e^((|x_i - y_b|^2)/T)
-             }
-             vIA = exp(-(pow((*i - *a).manhattanDistance(),2))/T)/denominator;
-             //e^((|x_i - y_a|^2)/T) / sum(b e nodes) e^((|x_i - y_b|^2)/T)
 
-             deltaYa += (*i - *a) * vIA;
+    //iteration over all nodes:
+    for (int a = 0; a < nodes.size(); a++) {
 
-         }
+        //iteration over all cities:
+        for (int i = 0; i < cities.size(); i++) {
+            double sum_denominator = 0;
 
-         deltaYa *= getAlpha();
+            //and once more over all the nodes to calculate the denominator in ny(i, a):
+            for (int b = 0; b < nodes.size(); b++) {
+                sum_denominator += exp(-(pow(manhattan_distance(cities[i]) - manhattan_distance(nodes[b]), 2) / T_n));
+            }
+            //calculate ny(i, a)
+            double ny_i_a;
+            ny_i_a = exp(-(pow(manhattan_distance(cities[i]) - manhattan_distance(nodes[a]), 2) / T_n)) /
+                     sum_denominator;
+            //calculate the sum of ny_i_y multiplied by the distance of city and node
+            sum_ny_i_a += (ny_i_a * manhattan_distance(cities[i]) - manhattan_distance(nodes[a]));
+        }
+        int next_node_higher;
+        int next_node_lower;
 
-         auto left = a-1;
-         auto right = a+1;
-
-         if (left < nodes.begin())
-             left += numberNodes;
-
-         if (right >= nodes.end())
-             right -= numberNodes;
-
-         deltaYa += (*left + *right - (*a * 2)) * getBeta()*K;
-         deltaY[a_counter] = deltaYa;
-
-         //reset
-         deltaYa = Point();
-         a_counter++;
-
-     }
-
-     a_counter = 0;
-
-     for(int a = 0; a < net->getNumberNodes(); a++){
-             //net->getNodes()[a] += deltaY[a]; ging nicht
-             net->changeNet(a, deltaY[a]);
+        //next to the node on the highest end is the first node of the vector
+        if (a == nodes.size()) {
+            next_node_higher = 0;
+        } else {
+            next_node_higher = a + 1;
+        }
+        //next to the node with index = 0 is the one on the highest end of the vector
+        if (a == 0) {
+            next_node_lower = nodes.size();
+        } else {
+            next_node_lower = a - 1;
         }
 
+        delta_y0 = get_alpha() * sum_ny_i_a + get_beta() * K_n * (get<0>(nodes[(next_node_lower) % nodes.size()]) -
+                                                                  (2 * get<0>(nodes[a])) +
+                                                                  (get<0>(nodes[(next_node_higher) % nodes.size()])));
+        delta_y1 = get_alpha() * sum_ny_i_a + get_beta() * K_n * (get<1>(nodes[(next_node_lower) % nodes.size()]) -
+                                                                  (2 * get<1>(nodes[a])) +
+                                                                  (get<1>(nodes[(next_node_higher) % nodes.size()])));
 
- iterCounter += 1;
-
- }
-
-
-double Iterator::calcEta(){
-
-   double dist = 0;
-   double distMin = 100000;
-   double distMax = -100000;
-
-   vector<Point> nodes = this->net->getNodes();
-   vector<Point> cities = this->net->getCities();
-
-   for(auto i = cities.begin(); i != cities.end(); i++){
-       for(auto a = nodes.begin(); a != nodes.end(); a++){
-           dist = (*i - *a).euclidianDistance();
-           distMin = min(dist, distMin);
-       }
-       distMax = max(distMin, distMax);
-   }
-
-   return distMax;
+        get<0>(nodes[a]) = get<0>(nodes[a]) + delta_y0;
+        get<1>(nodes[a]) = get<1>(nodes[a]) + delta_y1;
+    }
+    n++;
+    cout << n << endl;
+    EN->update_nodes(nodes);
+    for (tuple_list::const_iterator g = nodes.begin(); g != nodes.end(); g++) {
+        // prints positions of new nodes for bug fixing purpose
+        cout << get<0>(*g) << " " << get<1>(*g) << endl;
+    }
 
 }
 
-void Iterator::solve(){
+//calculate accuracy: a compare value it installed to compare ist to every euclidian distance of noodes and cities
+double Iterator::calculate_accuracy() {
+    tuple_list nodes = EN->getposition_of_circle_node();
+    tuple_list cities = EN->getpositioncity();
+    double distance;
+    double min_compare = 10000.0;
+    double max_compare = -10000.0;
+        for(int i = 0; i < cities.size(); i++){
+        for(int a = 0; a < nodes.size(); a++){
+            distance = euclidian_distance(cities[i]) - euclidian_distance(nodes[a]);
+            min_compare = min(min_compare, distance);
 
-   while((calcEta() > etaTarget)||(iterCounter < iterMax)){
-       apply();
-   }
+#ifdef REDUCE
+            if(distance<=eta){
+                nodes.erase(nodes.begin() + a);
+            }
+#endif
+        }
+        max_compare = max(min_compare, max_compare);
+    }
+    //returns the greatest deviation of cities to nodes
+    return abs(max_compare);
+
+}
+
+tuple_list Iterator::solve(){
+    this->n = 0;
+
+    //execute member function apply until it either reaches a set accuracy(eta) or a maximum of iterations
+    while((calculate_accuracy() > eta)&&(n < iter_max)){
+        apply();
+    }
+    //returns a vector with all coordinates of the nodes after executing "apply"
+
+    return EN->getposition_of_circle_node();
 
 }
